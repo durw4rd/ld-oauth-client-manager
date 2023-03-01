@@ -10,13 +10,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-
         <ApiTokenForm />
         <img src={logo} className="App-logo" alt="logo" />
-        
-        {/* <OAuthClient />
-        <ExistingClients />
-        <ClientDeleter /> */}
         <HandleOauthClients />
       </header>
     </div>
