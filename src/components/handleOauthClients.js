@@ -1,11 +1,30 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useState, useEffect } from 'react';
 import localStorage from 'local-storage';
+import { Button, TextField, FormControl, TableContainer, Table, TableHead, TableBody, TableRow, Modal, Typography, Box } from '@mui/material';
+
+const modalStyle = {
+    position: "absolute",
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '60%',
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
 
 export default function HandleOauthClients() {
 
-    let [OauthClients, setOauthClients] = useState([]);
-    // let [clientName, setClientName] = useState("");
+    const [OauthClients, setOauthClients] = useState([]);
+    const [inputValue, setInputValue] = useState("");
+    const [clientId, setClientId] = useState("");
+    const [clientSecret, setClientSecret] = useState("");
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const handleOpen = () => setModalOpen(true);
+    const handleClose = () => setModalOpen(false);
 
     const apiToken = localStorage.get("ld-api-key");
     
@@ -29,7 +48,11 @@ export default function HandleOauthClients() {
         })
             .then(res => {
                 console.log(`Response status: ${res.status}`);
+                console.log(res.data)
                 listClients();
+                setClientId(res.data._clientId);
+                setClientSecret(res.data._clientSecret)
+                handleOpen();
             })
             .catch(e => {
                 console.log(e);
@@ -46,12 +69,17 @@ export default function HandleOauthClients() {
             .then(res => {
                 console.log(`Response code: ${res.status}`);
                 const rawClients = res.data.items;
-                // console.log(rawClients);
                 setOauthClients(rawClients) 
             })
             .catch(e => {
                 console.log(e);
             })
+    }
+
+    const convertTimestampToDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const humanDate = date.toLocaleString();
+        return humanDate;
     }
 
     const deleteClient = (clientId) => {
@@ -73,47 +101,92 @@ export default function HandleOauthClients() {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        // setClientName(event.target.elements['oauthClientName'].value);
-        createClient(event.target.elements['oauthClientName'].value);
-        event.target.elements['oauthClientName'].form.reset();
+        console.log("Input value:", inputValue);
+
+        createClient(inputValue);
+        setInputValue("");        
     }
+
+    const handleInputChange = (event) => {
+        setInputValue(event.target.value);
+    };
     
     return (
-        <div style={{width: "90%"}}>
-            <form onSubmit={handleFormSubmit}>
-                <fieldset>
-                <div className="flex">
-                    <label>
-                        New Client Name:
-                        <input name="oauthClientName" type="text" placeholder="Enter Name of the new client"></input>
-                    </label>
-                    <button style={{border: "4px solid white", margin: "16px", padding: "8px"}}>Create Client!</button>
-                </div>
-                </fieldset>
-            </form>
-            <table style={{borderCollapse: "collapse", width: "100%"}}>
-                <thead>
-                    <tr>
-                        <th style={{border: "1px solid white"}}>Client name</th>
-                        <th style={{border: "1px solid white"}}>Client ID</th>
-                        <th style={{border: "1px solid white"}}>Creation Date</th>
-                        <th style={{border: "1px solid white"}}>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>{
-                    OauthClients.map(({name, _clientId, _creationDate},index) => {
-                        return (
-                            <tr key={index}>
-                                <td style={{border: "1px solid white"}}>{name}</td>
-                                <td style={{border: "1px solid white"}}>{_clientId}</td>
-                                <td style={{border: "1px solid white"}}>{_creationDate}</td>
-                                <td style={{border: "1px solid white"}}><button style={{border: "4px solid white"}} onClick={ () => deleteClient(_clientId) }>delete client</button></td>
-                            </tr> 
-                        )
-                    })
-                }
-                </tbody>
-            </table>
+        <div style={{minWidth: "90%"}}>
+            <FormControl sx={{ marginBottom: "1em" }}>
+                <form 
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    onSubmit={handleFormSubmit}
+                >
+                    <TextField
+                        fullWidth
+                        id="client-name"
+                        label="Enter the OAuth client name"
+                        variant="filled"
+                        size="small"
+                        sx={{ backgroundColor: "white" }}
+                        value={inputValue}
+                        onChange={handleInputChange}
+                    />
+                    <Button 
+                        type="submit"
+                        variant="contained" 
+                        sx={{ color: "#282C34", backgroundColor: "white" }}
+                    >
+                        Create OAuth Client!
+                    </Button>
+
+                </form>
+            </FormControl>
+            <Modal
+                open={modalOpen}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                >
+                <Box sx={modalStyle}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                    Details of the new OAuth client
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        <b>Client ID:</b> {clientId}
+                        <br/>
+                        <b>Client Secret:</b> {clientSecret}
+                    </Typography>
+                    <br/>
+                    <Button variant="contained" sx={{ color: "#282C34", backgroundColor: "white" }} onClick={() => setModalOpen(false)}>Close modal</Button>
+                </Box>
+            </Modal>
+            <h3>Existing OAuth clients</h3>
+            <TableContainer sx={{ maxWidth: "100%" }}>
+                <Table sx={{ }}>
+                    <TableHead>
+                        <TableRow>
+                            <th style={{border: "1px solid white", padding: "5px"}}>Client name</th>
+                            <th style={{border: "1px solid white", padding: "5px"}}>Client ID</th>
+                            <th style={{border: "1px solid white", padding: "5px"}}>Creation Date</th>
+                            <th style={{border: "1px solid white", padding: "5px"}}>Delete</th>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>{
+                        OauthClients.map(({name, _clientId, _creationDate},index) => {
+                            return (
+                                <TableRow key={index}>
+                                    <td style={{border: "1px solid white", padding: "5px"}}>{name}</td>
+                                    <td style={{border: "1px solid white", padding: "5px"}}>{_clientId}</td>
+                                    <td style={{border: "1px solid white", padding: "5px"}}>{convertTimestampToDate(_creationDate)}</td>
+                                    <td style={{border: "1px solid white", padding: "5px"}}><Button variant="contained" sx={{ color: "#282C34", backgroundColor: "white" }} onClick={ () => deleteClient(_clientId) }>delete client</Button></td>
+                                </TableRow> 
+                            )
+                        })
+                    }
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     )
 }
