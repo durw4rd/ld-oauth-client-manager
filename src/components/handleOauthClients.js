@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import localStorage from 'local-storage';
 import { Button, TextField, FormControl, TableContainer, Table, TableHead, TableBody, TableRow, Modal, Typography, Box } from '@mui/material';
@@ -18,10 +18,10 @@ const modalStyle = {
 export default function HandleOauthClients() {
 
     const [OauthClients, setOauthClients] = useState([]);
-    const [inputValue, setInputValue] = useState("");
+    const [inputClientName, setInputClientName] = useState("");
+    const [inputRedirectUrl, setInputRedirectUrl] = useState("");
     const [clientId, setClientId] = useState("");
     const [clientSecret, setClientSecret] = useState("");
-
     const [modalOpen, setModalOpen] = useState(false);
     const handleOpen = () => setModalOpen(true);
     const handleClose = () => setModalOpen(false);
@@ -34,11 +34,11 @@ export default function HandleOauthClients() {
         }
     }, [])
 
-    const createClient = (name) => {
+    const createClient = (name, redirectUrl) => {
         axios.post('https://app.launchdarkly.com/api/v2/oauth/clients', {
             "name": name,
-            "redirectUri": "https://app.launchdarkly.com/login",
-            "description": "Lorem Ipsum"
+            "redirectUri": redirectUrl,
+            "description": "Created via OAuth client creator V1.1"
         },{
             headers: {
                 "LD-API-Version": "beta",
@@ -101,14 +101,17 @@ export default function HandleOauthClients() {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        console.log("Input value:", inputValue);
-
-        createClient(inputValue);
-        setInputValue("");        
+        createClient(inputClientName, inputRedirectUrl);
+        setInputClientName("");
+        setInputRedirectUrl("");    
     }
 
-    const handleInputChange = (event) => {
-        setInputValue(event.target.value);
+    const handleClientNameInputChange = (event) => {
+        setInputClientName(event.target.value);
+    };
+
+    const handleRedirectUrlInputChange = (event) => {
+        setInputRedirectUrl(event.target.value);
     };
     
     return (
@@ -129,8 +132,18 @@ export default function HandleOauthClients() {
                         variant="filled"
                         size="small"
                         sx={{ backgroundColor: "white" }}
-                        value={inputValue}
-                        onChange={handleInputChange}
+                        value={inputClientName}
+                        onChange={handleClientNameInputChange}
+                    />
+                    <TextField
+                        fullWidth
+                        id="redirect-uri"
+                        label="Enter the redirect URL"
+                        variant="filled"
+                        size="small"
+                        sx={{ backgroundColor: "white" }}
+                        value={inputRedirectUrl}
+                        onChange={handleRedirectUrlInputChange}
                     />
                     <Button 
                         type="submit"
@@ -162,22 +175,24 @@ export default function HandleOauthClients() {
                 </Box>
             </Modal>
             <h3>Existing OAuth clients</h3>
-            <TableContainer sx={{ maxWidth: "100%" }}>
+            <TableContainer sx={{ maxWidth: "100%", fontSize: "0.5em", paddingBottom: "30px" }}>
                 <Table sx={{ }}>
                     <TableHead>
                         <TableRow>
                             <th style={{border: "1px solid white", padding: "5px"}}>Client name</th>
                             <th style={{border: "1px solid white", padding: "5px"}}>Client ID</th>
+                            <th style={{border: "1px solid white", padding: "5px"}}>Redirect URL</th>
                             <th style={{border: "1px solid white", padding: "5px"}}>Creation Date</th>
                             <th style={{border: "1px solid white", padding: "5px"}}>Delete</th>
                         </TableRow>
                     </TableHead>
                     <TableBody>{
-                        OauthClients.map(({name, _clientId, _creationDate},index) => {
+                        OauthClients.map(({name, _clientId, redirectUri,_creationDate},index) => {
                             return (
                                 <TableRow key={index}>
                                     <td style={{border: "1px solid white", padding: "5px"}}>{name}</td>
                                     <td style={{border: "1px solid white", padding: "5px"}}>{_clientId}</td>
+                                    <td style={{border: "1px solid white", padding: "5px"}}>{redirectUri}</td>
                                     <td style={{border: "1px solid white", padding: "5px"}}>{convertTimestampToDate(_creationDate)}</td>
                                     <td style={{border: "1px solid white", padding: "5px"}}><Button variant="contained" sx={{ color: "#282C34", backgroundColor: "white" }} onClick={ () => deleteClient(_clientId) }>delete client</Button></td>
                                 </TableRow> 
