@@ -1,16 +1,15 @@
 {
   "files": {
-    "main.css": "/ld-oauth-client-manager/static/css/main.b64c1867.css",
-    "main.js": "/ld-oauth-client-manager/static/js/main.88d78624.js",
-    "static/js/787.1f89c733.chunk.js": "/ld-oauth-client-manager/static/js/787.1f89c733.chunk.js",
-    "static/media/logo.svg": "/ld-oauth-client-manager/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "main.css": "/ld-oauth-client-manager/static/css/main.fd86a3bf.css",
+    "main.js": "/ld-oauth-client-manager/static/js/main.e9352a88.js",
+    "static/js/453.ac201114.chunk.js": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js",
     "index.html": "/ld-oauth-client-manager/index.html",
-    "main.b64c1867.css.map": "/ld-oauth-client-manager/static/css/main.b64c1867.css.map",
-    "main.88d78624.js.map": "/ld-oauth-client-manager/static/js/main.88d78624.js.map",
-    "787.1f89c733.chunk.js.map": "/ld-oauth-client-manager/static/js/787.1f89c733.chunk.js.map"
+    "main.fd86a3bf.css.map": "/ld-oauth-client-manager/static/css/main.fd86a3bf.css.map",
+    "main.e9352a88.js.map": "/ld-oauth-client-manager/static/js/main.e9352a88.js.map",
+    "453.ac201114.chunk.js.map": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b64c1867.css",
-    "static/js/main.88d78624.js"
+    "static/css/main.fd86a3bf.css",
+    "static/js/main.e9352a88.js"
   ]
 }
