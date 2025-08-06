@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import localStorage from 'local-storage';
-import { Button, TextField, FormControl, TableContainer, Table, TableHead, TableBody, TableRow, Modal, Typography, Box } from '@mui/material';
+import { Button, TextField, FormControl, TableContainer, Table, TableHead, TableBody, TableRow, Modal, Typography, Box, CircularProgress, Alert } from '@mui/material';
 
 const modalStyle = {
     position: "absolute",
@@ -23,18 +23,66 @@ export default function HandleOauthClients() {
     const [clientId, setClientId] = useState("");
     const [clientSecret, setClientSecret] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [totalLoaded, setTotalLoaded] = useState(0);
+    const [apiToken, setApiToken] = useState(localStorage.get("ld-api-key"));
+    
     const handleOpen = () => setModalOpen(true);
     const handleClose = () => setModalOpen(false);
-
-    const apiToken = localStorage.get("ld-api-key");
     
     useEffect(() => {
         if(apiToken !== null) {
-            listClients();
+            loadAllClients();
         }
-    }, [])
+    }, [apiToken])
+
+    // Listen for localStorage changes
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const newApiToken = localStorage.get("ld-api-key");
+            if (newApiToken !== apiToken) {
+                // Force re-render by updating state
+                setApiToken(newApiToken);
+            }
+        };
+
+        // Check for changes periodically
+        const interval = setInterval(handleStorageChange, 1000);
+        
+        return () => clearInterval(interval);
+    }, [apiToken]);
+
+    const loadAllClients = async () => {
+        setIsLoading(true);
+        setError(null);
+        setOauthClients([]);
+        setTotalLoaded(0);
+        
+        try {
+            const response = await axios.get('https://app.launchdarkly.com/api/v2/oauth/clients', {
+                headers: {
+                    "LD-API-Version": "beta",
+                    "Authorization": apiToken
+                }
+            });
+            
+            const clients = response.data.items || [];
+            setOauthClients(clients);
+            setTotalLoaded(clients.length);
+            
+        } catch (err) {
+            console.error('Error loading OAuth clients:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to load OAuth clients');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const createClient = (name, redirectUrl) => {
+        setIsLoading(true);
+        setError(null);
+        
         axios.post('https://app.launchdarkly.com/api/v2/oauth/clients', {
             "name": name,
             "redirectUri": redirectUrl,
@@ -43,37 +91,29 @@ export default function HandleOauthClients() {
             headers: {
                 "LD-API-Version": "beta",
                 'Content-Type': 'application/json',
-                "Authorization": localStorage.get("ld-api-key")
+                "Authorization": apiToken
             }
         })
             .then(res => {
                 console.log(`Response status: ${res.status}`);
                 console.log(res.data)
-                listClients();
+                loadAllClients(); // Reload all clients after creation
                 setClientId(res.data._clientId);
                 setClientSecret(res.data._clientSecret)
                 handleOpen();
             })
             .catch(e => {
                 console.log(e);
+                setError(e.response?.data?.message || e.message || 'Failed to create OAuth client');
+            })
+            .finally(() => {
+                setIsLoading(false);
             })
     }
 
     const listClients = () => {
-        axios.get('https://app.launchdarkly.com/api/v2/oauth/clients',{
-            headers: {
-                "LD-API-Version": "beta",
-                "Authorization": localStorage.get("ld-api-key")
-            }
-        })
-            .then(res => {
-                console.log(`Response code: ${res.status}`);
-                const rawClients = res.data.items;
-                setOauthClients(rawClients) 
-            })
-            .catch(e => {
-                console.log(e);
-            })
+        // Legacy function - now calls loadAllClients
+        loadAllClients();
     }
 
     const convertTimestampToDate = (timestamp) => {
@@ -83,20 +123,26 @@ export default function HandleOauthClients() {
     }
 
     const deleteClient = (clientId) => {
+        setIsLoading(true);
+        setError(null);
                 
         axios.delete(`https://app.launchdarkly.com/api/v2/oauth/clients/${clientId}`, {
-            headers: {
-                "LD-API-Version": "beta",
-                "Authorization": localStorage.get("ld-api-key")
-            }
+                            headers: {
+                    "LD-API-Version": "beta",
+                    "Authorization": apiToken
+                }
         })
             .then(res => {
                 console.log(`Response status: ${res.status}`);
+                loadAllClients(); // Reload all clients after deletion
             })
             .catch(e => {
                 console.log(e);
+                setError(e.response?.data?.message || e.message || 'Failed to delete OAuth client');
             })
-            .finally(() => listClients())
+            .finally(() => {
+                setIsLoading(false);
+            })
     }
 
     const handleFormSubmit = (event) => {
@@ -149,12 +195,20 @@ export default function HandleOauthClients() {
                         type="submit"
                         variant="contained" 
                         sx={{ color: "#282C34", backgroundColor: "white" }}
+                        disabled={isLoading}
                     >
                         Create OAuth Client!
                     </Button>
 
                 </form>
             </FormControl>
+            
+            {error && (
+                <Alert severity="error" sx={{ marginBottom: "1em" }}>
+                    {error}
+                </Alert>
+            )}
+            
             <Modal
                 open={modalOpen}
                 onClose={handleClose}
@@ -174,7 +228,17 @@ export default function HandleOauthClients() {
                     <Button variant="contained" sx={{ color: "#282C34", backgroundColor: "white" }} onClick={() => setModalOpen(false)}>Close modal</Button>
                 </Box>
             </Modal>
-            <h3>Existing OAuth clients</h3>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1em' }}>
+                <h3>Existing OAuth clients ({totalLoaded})</h3>
+                {isLoading && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CircularProgress size={20} />
+                        <span>Loading...</span>
+                    </div>
+                )}
+            </div>
+            
             <TableContainer sx={{ maxWidth: "100%", fontSize: "0.5em", paddingBottom: "30px" }}>
                 <Table sx={{ }}>
                     <TableHead>
@@ -194,7 +258,16 @@ export default function HandleOauthClients() {
                                     <td style={{border: "1px solid white", padding: "5px"}}>{_clientId}</td>
                                     <td style={{border: "1px solid white", padding: "5px"}}>{redirectUri}</td>
                                     <td style={{border: "1px solid white", padding: "5px"}}>{convertTimestampToDate(_creationDate)}</td>
-                                    <td style={{border: "1px solid white", padding: "5px"}}><Button variant="contained" sx={{ color: "#282C34", backgroundColor: "white" }} onClick={ () => deleteClient(_clientId) }>delete client</Button></td>
+                                    <td style={{border: "1px solid white", padding: "5px"}}>
+                                        <Button 
+                                            variant="contained" 
+                                            sx={{ color: "#282C34", backgroundColor: "white" }} 
+                                            onClick={() => deleteClient(_clientId)}
+                                            disabled={isLoading}
+                                        >
+                                            delete client
+                                        </Button>
+                                    </td>
                                 </TableRow> 
                             )
                         })

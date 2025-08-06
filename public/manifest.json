@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "LD OAuth Manager",
+  "name": "LD OAuth Apps Manager",
   "icons": [
     {
       "src": "favicon.ico",
