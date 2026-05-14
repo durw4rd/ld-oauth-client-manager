@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import localStorage from 'local-storage';
-import { Button, TextField, FormControl } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 export default function ApiTokenForm() {
     const [APIKey, setAPIKey] = useState("");
@@ -12,8 +16,6 @@ export default function ApiTokenForm() {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-
-        console.log("Input value:", inputValue);
 
         localStorage.set('ld-api-key', inputValue);
         setAPIKey(inputValue);
@@ -32,38 +34,45 @@ export default function ApiTokenForm() {
     }
 
     return (
-        <div>
-            <FormControl sx={{width: "100%"}}>
-                <form 
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center"
-                    }}
-                    onSubmit={handleFormSubmit}
+        <Stack spacing={2} sx={{ maxWidth: 520 }}>
+            <Typography variant="h2" component="h2" sx={{ fontSize: '1.25rem' }}>
+                API access
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+                Use a{' '}
+                <a
+                    className="ld-link"
+                    href="https://docs.launchdarkly.com/home/account/api"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
-                    <TextField
-                        fullWidth
-                        id="api-key"
-                        label="Enter your API key"
-                        variant="filled"
-                        size="small"
-                        sx={{ backgroundColor: "white" }}
-                        value={inputValue}
-                        onChange={handleInputChange}
-                    />
-                    <Button 
-                        type="submit" 
-                        variant="contained" 
-                        sx={{ color: "#282C34", backgroundColor: "white" }}
-                    >
-                        Submit
-                    </Button>
-                </form>
-            </FormControl>
+                    personal or service access token
+                </a>{' '}
+                with permission to manage OAuth clients. It is stored only in this browser (local storage).
+            </Typography>
+            <Box
+                component="form"
+                onSubmit={handleFormSubmit}
+                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+            >
+                <TextField
+                    fullWidth
+                    id="api-key"
+                    label="API access token"
+                    type="password"
+                    autoComplete="off"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                />
+                <Button type="submit" variant="contained" color="primary" sx={{ alignSelf: 'flex-start' }}>
+                    Save token
+                </Button>
+            </Box>
 
-            <p><b>Saved API Key:</b> {APIKey ? obfuscateString(APIKey) : "null"}</p>
-        </div>
+            <Typography variant="body2" color="text.secondary">
+                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>Saved token:</Box>{' '}
+                {APIKey ? obfuscateString(APIKey) : 'None'}
+            </Typography>
+        </Stack>
     )
 }
-

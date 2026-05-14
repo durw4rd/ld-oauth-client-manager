@@ -1,11 +1,16 @@
 {
   "short_name": "LD OAuth Manager",
-  "name": "LD OAuth Apps Manager",
+  "name": "LaunchDarkly OAuth client manager",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "favicon-32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "favicon-16.png",
+      "type": "image/png",
+      "sizes": "16x16"
     },
     {
       "src": "logo192.png",
@@ -20,6 +25,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#191919",
+  "background_color": "#191919"
 }
