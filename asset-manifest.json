@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ld-oauth-client-manager/static/css/main.fd86a3bf.css",
-    "main.js": "/ld-oauth-client-manager/static/js/main.e9352a88.js",
+    "main.css": "/ld-oauth-client-manager/static/css/main.f9ca9c7c.css",
+    "main.js": "/ld-oauth-client-manager/static/js/main.ff71dbb8.js",
     "static/js/453.ac201114.chunk.js": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js",
     "index.html": "/ld-oauth-client-manager/index.html",
-    "main.fd86a3bf.css.map": "/ld-oauth-client-manager/static/css/main.fd86a3bf.css.map",
-    "main.e9352a88.js.map": "/ld-oauth-client-manager/static/js/main.e9352a88.js.map",
+    "main.f9ca9c7c.css.map": "/ld-oauth-client-manager/static/css/main.f9ca9c7c.css.map",
+    "main.ff71dbb8.js.map": "/ld-oauth-client-manager/static/js/main.ff71dbb8.js.map",
     "453.ac201114.chunk.js.map": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.fd86a3bf.css",
-    "static/js/main.e9352a88.js"
+    "static/css/main.f9ca9c7c.css",
+    "static/js/main.ff71dbb8.js"
   ]
 }
