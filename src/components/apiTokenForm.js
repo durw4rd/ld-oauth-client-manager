@@ -3,7 +3,9 @@ import localStorage from 'local-storage';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Paper from '@mui/material/Paper';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -11,10 +13,17 @@ import Stack from '@mui/material/Stack';
 export default function ApiTokenForm() {
     const [APIKey, setAPIKey] = useState("");
     const [inputValue, setInputValue] = useState("");
+    const [isEu, setIsEu] = useState(false);
 
     useEffect(() => {
         setAPIKey(localStorage.get('ld-api-key'));
+        setIsEu(!!localStorage.get('ld-eu-account'));
     }, [])
+
+    const handleEuToggle = (checked) => {
+        setIsEu(checked);
+        localStorage.set('ld-eu-account', checked);
+    };
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
@@ -78,13 +87,33 @@ export default function ApiTokenForm() {
                             value={inputValue}
                             onChange={handleInputChange}
                         />
-                        <Button type="submit" variant="contained" color="primary" sx={{ alignSelf: 'flex-start' }}>
-                            Save token
-                        </Button>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Button type="submit" variant="contained" color="primary">
+                                Save token
+                            </Button>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={isEu}
+                                        onChange={(e) => handleEuToggle(e.target.checked)}
+                                        size="small"
+                                        color="primary"
+                                    />
+                                }
+                                label={
+                                    <Typography variant="body2" color="text.secondary">
+                                        EU account
+                                    </Typography>
+                                }
+                            />
+                        </Box>
                     </Box>
                     <Typography variant="body2" color="text.secondary">
                         <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>Saved token:</Box>{' '}
                         {APIKey ? obfuscateString(APIKey) : 'None'}
+                        {' · '}
+                        <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>Region:</Box>{' '}
+                        {isEu ? 'EU (app.eu.launchdarkly.com)' : 'US (app.launchdarkly.com)'}
                     </Typography>
                 </Stack>
             </Box>

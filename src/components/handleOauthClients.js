@@ -29,12 +29,15 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon, RefreshIcon, EditIcon } from './icons';
 
-const LD_API_ORIGIN = 'https://app.launchdarkly.com';
+const LD_ORIGINS = {
+    us: 'https://app.launchdarkly.com',
+    eu: 'https://app.eu.launchdarkly.com',
+};
 
-function resolveLdNextPageUrl(href) {
+function resolveLdNextPageUrl(href, origin) {
     if (!href || typeof href !== 'string') return null;
     try {
-        return new URL(href, LD_API_ORIGIN).href;
+        return new URL(href, origin).href;
     } catch {
         return null;
     }
@@ -130,6 +133,8 @@ export default function HandleOauthClients() {
     const [error, setError] = useState(null);
     const [totalLoaded, setTotalLoaded] = useState(0);
     const [apiToken, setApiToken] = useState(localStorage.get("ld-api-key"));
+    const [isEu, setIsEu] = useState(!!localStorage.get("ld-eu-account"));
+    const apiOrigin = isEu ? LD_ORIGINS.eu : LD_ORIGINS.us;
 
     // Edit dialog state
     const [editOpen, setEditOpen] = useState(false);
@@ -153,7 +158,7 @@ export default function HandleOauthClients() {
 
         try {
             const allClients = [];
-            let nextUrl = `${LD_API_ORIGIN}/api/v2/oauth/clients`;
+            let nextUrl = `${apiOrigin}/api/v2/oauth/clients`;
             const maxPages = 500;
             let page = 0;
 
@@ -168,7 +173,7 @@ export default function HandleOauthClients() {
                 allClients.push(...batch);
 
                 const href = response.data._links?.next?.href;
-                nextUrl = resolveLdNextPageUrl(href);
+                nextUrl = resolveLdNextPageUrl(href, apiOrigin);
             }
 
             setOauthClients(allClients);
@@ -179,7 +184,7 @@ export default function HandleOauthClients() {
         } finally {
             setIsLoading(false);
         }
-    }, [apiToken]);
+    }, [apiToken, apiOrigin]);
 
     useEffect(() => {
         if (apiToken !== null) {
@@ -187,17 +192,18 @@ export default function HandleOauthClients() {
         }
     }, [apiToken, loadAllClients]);
 
-    // Poll for API token changes (set from the sibling ApiTokenForm component)
+    // Poll for API token / region changes (set from the sibling ApiTokenForm component)
     useEffect(() => {
         const interval = setInterval(() => {
             const newApiToken = localStorage.get("ld-api-key");
-            if (newApiToken !== apiToken) {
-                setApiToken(newApiToken);
-            }
+            if (newApiToken !== apiToken) setApiToken(newApiToken);
+
+            const newIsEu = !!localStorage.get("ld-eu-account");
+            if (newIsEu !== isEu) setIsEu(newIsEu);
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [apiToken]);
+    }, [apiToken, isEu]);
 
     const createClient = ({ name, redirectUrl, description, scim }) => {
         setIsLoading(true);
@@ -207,7 +213,7 @@ export default function HandleOauthClients() {
         if (description) body.description = description;
         if (scim) body.scim = true;
 
-        axios.post(`${LD_API_ORIGIN}/api/v2/oauth/clients`, body, {
+        axios.post(`${apiOrigin}/api/v2/oauth/clients`, body, {
             headers: {
                 "LD-API-Version": "beta",
                 'Content-Type': 'application/json',
@@ -232,7 +238,7 @@ export default function HandleOauthClients() {
         setIsLoading(true);
         setError(null);
 
-        axios.delete(`${LD_API_ORIGIN}/api/v2/oauth/clients/${clientIdToDelete}`, {
+        axios.delete(`${apiOrigin}/api/v2/oauth/clients/${clientIdToDelete}`, {
             headers: {
                 "LD-API-Version": "beta",
                 "Authorization": apiToken
@@ -274,7 +280,7 @@ export default function HandleOauthClients() {
 
         try {
             await axios.patch(
-                `${LD_API_ORIGIN}/api/v2/oauth/clients/${editClient._clientId}`,
+                `${apiOrigin}/api/v2/oauth/clients/${editClient._clientId}`,
                 ops,
                 {
                     headers: {
