@@ -2,8 +2,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import ApiTokenForm from './components/apiTokenForm.js';
 import HandleOauthClients from './components/handleOauthClients.js';
 import ldTheme from './theme/ldTheme';
@@ -69,9 +69,10 @@ function App() {
         </Box>
 
         <Container maxWidth="lg" component="main" sx={{ flex: 1, py: 4, px: { xs: 2, sm: 3 } }}>
-          <ApiTokenForm />
-          <Divider sx={{ my: 4 }} />
-          <HandleOauthClients />
+          <Stack spacing={3}>
+            <ApiTokenForm />
+            <HandleOauthClients />
+          </Stack>
         </Container>
       </Box>
     </ThemeProvider>

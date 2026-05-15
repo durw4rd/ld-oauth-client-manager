@@ -87,11 +87,15 @@ const ldTheme = createTheme({
         root: {
           backgroundColor: ldGray05,
           borderRadius: 8,
+          border: `1px solid ${ldGray05}`,
+          transition: 'border-color 0.15s ease',
           '&:hover': {
             backgroundColor: '#4a4a4c',
+            borderColor: ldGray03,
           },
           '&.Mui-focused': {
             backgroundColor: ldGray05,
+            borderColor: ldBlue,
           },
         },
         underline: {
