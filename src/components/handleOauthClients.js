@@ -112,6 +112,17 @@ export default function HandleOauthClients() {
     const [inputRedirectUrl, setInputRedirectUrl] = useState("");
     const [inputDescription, setInputDescription] = useState("");
     const [inputScim, setInputScim] = useState(false);
+
+    const handleScimToggle = (checked) => {
+        setInputScim(checked);
+        if (checked) {
+            setInputDescription(prev => prev ? `${prev}\nSCIM-enabled.` : 'SCIM-enabled.');
+        } else {
+            setInputDescription(prev =>
+                prev.split('\n').filter(l => l.trim() !== 'SCIM-enabled.').join('\n').trimEnd()
+            );
+        }
+    };
     const [clientId, setClientId] = useState("");
     const [clientSecret, setClientSecret] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
@@ -126,7 +137,6 @@ export default function HandleOauthClients() {
     const [editName, setEditName] = useState("");
     const [editRedirectUri, setEditRedirectUri] = useState("");
     const [editDescription, setEditDescription] = useState("");
-    const [editScim, setEditScim] = useState(false);
     const [editLoading, setEditLoading] = useState(false);
     const [editError, setEditError] = useState(null);
 
@@ -242,7 +252,6 @@ export default function HandleOauthClients() {
         setEditName(client.name || "");
         setEditRedirectUri(client.redirectUri || "");
         setEditDescription(client.description || "");
-        setEditScim(client.scim || false);
         setEditError(null);
         setEditOpen(true);
     };
@@ -255,9 +264,6 @@ export default function HandleOauthClients() {
             ops.push({ op: "replace", path: "/redirectUri", value: editRedirectUri });
         if (editDescription !== (editClient.description || ""))
             ops.push({ op: "replace", path: "/description", value: editDescription });
-        if (editScim !== (editClient.scim || false))
-            ops.push({ op: "replace", path: "/scim", value: editScim });
-
         if (ops.length === 0) {
             setEditOpen(false);
             return;
@@ -346,6 +352,8 @@ export default function HandleOauthClients() {
                             label="Description (optional)"
                             value={inputDescription}
                             onChange={(e) => setInputDescription(e.target.value)}
+                            multiline
+                            minRows={1}
                         />
                     </Box>
 
@@ -353,12 +361,12 @@ export default function HandleOauthClients() {
                         <FormGroup row>
                             <FormControlLabel
                                 control={
-                                    <Switch
-                                        checked={inputScim}
-                                        onChange={(e) => setInputScim(e.target.checked)}
-                                        size="small"
-                                        color="primary"
-                                    />
+                            <Switch
+                                    checked={inputScim}
+                                    onChange={(e) => handleScimToggle(e.target.checked)}
+                                    size="small"
+                                    color="primary"
+                                />
                                 }
                                 label={
                                     <Typography variant="body2" color="text.secondary">
@@ -462,24 +470,6 @@ export default function HandleOauthClients() {
                                 multiline
                                 minRows={2}
                             />
-                            <Divider />
-                            <FormGroup row>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={editScim}
-                                            onChange={(e) => setEditScim(e.target.checked)}
-                                            size="small"
-                                            color="primary"
-                                        />
-                                    }
-                                    label={
-                                        <Typography variant="body2" color="text.secondary">
-                                            SCIM enabled
-                                        </Typography>
-                                    }
-                                />
-                            </FormGroup>
                         </Stack>
                     </DialogContent>
                     <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
