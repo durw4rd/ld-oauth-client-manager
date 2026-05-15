@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ld-oauth-client-manager/static/css/main.f9ca9c7c.css",
-    "main.js": "/ld-oauth-client-manager/static/js/main.8ba1664f.js",
+    "main.js": "/ld-oauth-client-manager/static/js/main.713c973a.js",
     "static/js/453.ac201114.chunk.js": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js",
     "index.html": "/ld-oauth-client-manager/index.html",
     "main.f9ca9c7c.css.map": "/ld-oauth-client-manager/static/css/main.f9ca9c7c.css.map",
-    "main.8ba1664f.js.map": "/ld-oauth-client-manager/static/js/main.8ba1664f.js.map",
+    "main.713c973a.js.map": "/ld-oauth-client-manager/static/js/main.713c973a.js.map",
     "453.ac201114.chunk.js.map": "/ld-oauth-client-manager/static/js/453.ac201114.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f9ca9c7c.css",
-    "static/js/main.8ba1664f.js"
+    "static/js/main.713c973a.js"
   ]
 }
